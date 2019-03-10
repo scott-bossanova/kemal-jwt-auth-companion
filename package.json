@@ -1,0 +1,37 @@
+{
+  "name": "kemal_jwt_auth_token",
+  "version": "1.0.0",
+  "description": "A client-side companion to make autheticating with a Kemal server a breeze.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dscottboggs/kemal_jwt_auth_token.git"
+  },
+  "keywords": [
+    "Kemal",
+    "Crystal",
+    "crystal-lang",
+    "JWT",
+    "authentication",
+    "rest-authentication",
+    "jwt-authentication",
+    "auth"
+  ],
+  "author": "D. Scott Boggs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dscottboggs/kemal_jwt_auth_token/issues"
+  },
+  "homepage": "https://github.com/dscottboggs/kemal_jwt_auth_token#readme",
+  "devDependencies": {
+    "browserify": "^16.2.3",
+    "jasmine": "^3.3.1"
+  },
+  "dependencies": {
+    "jasmine-ajax": "^3.4.0",
+    "node-fetch": "^2.3.0"
+  }
+}
