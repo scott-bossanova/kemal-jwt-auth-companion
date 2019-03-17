@@ -1,8 +1,8 @@
 {
-  "name": "kemal_jwt_auth_token",
-  "version": "1.0.0",
+  "name": "kemal_jwt_auth_companion",
+  "version": "1.0.1",
   "description": "A client-side companion to make autheticating with a Kemal server a breeze.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jasmine"
   },
@@ -27,11 +27,11 @@
   },
   "homepage": "https://github.com/dscottboggs/kemal_jwt_auth_token#readme",
   "devDependencies": {
-    "browserify": "^16.2.3",
-    "jasmine": "^3.3.1"
+    "browserify": "^16.2.3"
   },
   "dependencies": {
     "jasmine-ajax": "^3.4.0",
+    "jasmine": "^3.3.1",
     "node-fetch": "^2.3.0"
   }
 }
