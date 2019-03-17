@@ -1,17 +1,19 @@
+// get the fetch capability whether we're in the browser or node
+const fetch = window.fetch || require('node-fetch')
 
-class TooOldBrowser extends Error {
+export class TooOldBrowser extends Error {
   constructor() {
     super("your browser is too old to use the fetch() function! Use XHR instead.")
   }
 }
 
-class InvalidToken extends Error {
+export class InvalidToken extends Error {
   constructor(token_value) {
     super("got invalid token value '" + token_value + "'")
   }
 }
 
-class FailedLogin extends Error {
+export class FailedLogin extends Error {
   constructor(user, response) {
     const data = JSON.parse(response)
     let errors
@@ -24,8 +26,6 @@ class FailedLogin extends Error {
                  : '')
   }
 }
-
-const fetch = require('node-fetch')
 
 let token
 let handleError = console.error
@@ -50,7 +50,7 @@ const cookieHash = () => {
 const isNonEmptyArray = (potArr) => Array.isArray(potArr) && potArr.length
 
 // store the given value as a new authentication token.
-function keep(newToken) {
+const keep = (newToken) => {
   if( !newToken ) throw new InvalidToken(newToken)
   token = newToken
   document.cookie = "auth=" + newToken + ";samesite=strict;secure;max-age=" + days(7)
@@ -58,7 +58,7 @@ function keep(newToken) {
 }
 const retrieveToken = () => cookieHash()["auth"]
 
-module.exports = function(host, signInEndpoint = '/sign_in') {
+export default function(host, signInEndpoint = '/sign_in') {
   const SIGN_IN_ADDR = host + signInEndpoint
   if( !(signInEndpoint[0] == '/') ) signInEndpoint = '/' + signInEndpoint
   // Log in with a given username and password.
@@ -124,4 +124,4 @@ module.exports = function(host, signInEndpoint = '/sign_in') {
   return {login, authFetch, authXHR}
 }
 
-module.exports.onError = (action) => handleError = action
+export const onError = (action) => handleError = action
