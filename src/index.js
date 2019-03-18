@@ -65,46 +65,17 @@ export default function(host, signInEndpoint = '/sign_in') {
   //
   // This stores the login token in the document's cookie and returns it. Either
   // the username or password can be left off if the API supports it.
-  const fetchLogin = async (username, password) => {
+  const login = (username, password) => new Promise((resolve, reject) => {
     let data = {}
     if( username ) data['user'] = username
     if( password ) data['auth'] = password
-    const response = await fetch(SIGN_IN_ADDR, {method: 'POST', body: JSON.stringify(data)})
-    if( !response.ok ) throw new FailedLogin(username, response)
-    const json = await response.json()
-    if(isNonEmptyArray(json.errors)) json.errors.forEach(e => handleError(e))
-    return keep(json.token)
-  }
-  // Log in with a given username and password.
-  //
-  // This stores the login token in the document's cookie and returns it. Either
-  // the username or password can be left off if the API supports it.
-  const login = (username, password) => {
-    new Promise(function(resolve, reject) {
-      const xhr = new XMLHttpRequest()
-      xhr.onreadystatechange = function(args) {
-        if( this.readyState === this.DONE){
-          let data
-          try {
-            data = JSON.parse(this.responseText)
-          } catch (e) {
-            data = {
-              errors: [
-                e,
-                `requst to ${SIGN_IN_ADDR} for user ${username} and password REDACTED failed with status ${this.statusText}`,
-              ]
-            }
-          }
-          if( this.status === 200)
-            resolve(keep(data.token))
-          else reject(data.errors)
-        }
-      }
-      xhr.setRequestHeader('Accept', 'application/json')
-      xhr.open('POST', SIGN_IN_ADDR)
-      xhr.send(JSON.stringify({user: username, auth: password}))
-    });
-  }
+    fetch(SIGN_IN_ADDR, {method: 'POST', body: JSON.stringify(data)})
+      .then(response => response.ok? response.json()
+                                   : reject(new FailedLogin(username, password)))
+      .then(({ errors, token }) => {
+        if( isNonEmptyArray(errors) ) errors.forEach(e => handleError(e))
+        resolve(keep(token)) })
+  })
   // This function mirrors the functionality of the normal `fetch()` function,
   // but adds the authentication token to the header before calling fetch.
   const authFetch = (input, init) => {
