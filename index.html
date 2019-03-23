@@ -5,8 +5,11 @@
     <title>Fuckin kemal library test shit</title>
     <script src="/kemal-jwt-auth.js" charset="utf-8"></script>
     <script type="text/javascript">
-      const { login, authFetch } = KemalAuth.default("http://127.0.0.1:3000/", "/api/sign_in")
-
+      const { login, authFetch } = KemalAuth.default("", "/api/sign_in")
+      let user = "test user"
+      let pw = 'test user password'
+      let p = login(user, pw)
+      p.then(console.log).catch(console.error)
     </script>
   </head>
   <body>

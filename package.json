@@ -1,6 +1,6 @@
 {
   "name": "kemal_jwt_auth_companion",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A client-side companion to make autheticating with a Kemal server a breeze.",
   "main": "build/kemal-jwt-auth.js",
   "scripts": {

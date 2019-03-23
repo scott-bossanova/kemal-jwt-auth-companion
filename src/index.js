@@ -15,9 +15,11 @@ export class InvalidToken extends Error {
 
 export class FailedLogin extends Error {
   constructor(user, response) {
-    const data = JSON.parse(response)
     let errors
-    if( data.errors && data.errors.length ) errors = data.errors
+    if( typeof response === 'string' || response instanceof String )
+      errors = response
+    if( response.errors && Array.isArray(response.errors) && response.errors.length)
+      errors = response.errors.join("; ")
     super( 'failed to log in "' +
            user +
            '": status ' +
@@ -67,14 +69,23 @@ export default function(host, signInEndpoint = '/sign_in') {
   // the username or password can be left off if the API supports it.
   const login = (username, password) => new Promise((resolve, reject) => {
     let data = {}
-    if( username ) data['user'] = username
+    if( username ) data['name'] = username
     if( password ) data['auth'] = password
     fetch(SIGN_IN_ADDR, {method: 'POST', body: JSON.stringify(data)})
-      .then(response => response.ok? response.json()
-                                   : reject(new FailedLogin(username, password)))
-      .then(({ errors, token }) => {
+      .then(response => {
+        if( response.ok ) return response.json()
+        console.log(response.statusText)
+        return response.json()
+          .then( ({errors}) => reject(new FailedLogin(username, errors)))
+          .catch(e => { console.error(e); return response.text()})
+          .then(text => reject(new FailedLogin(username, text)))
+          .catch(() => reject(new FailedLogin(username, `status code ${response.status}`)))})
+      .then(json => {
+        if( !json ) return reject(`got json response '${json}'`)
+        const { errors, token } = json
         if( isNonEmptyArray(errors) ) errors.forEach(e => handleError(e))
         resolve(keep(token)) })
+      .catch(handleError)
   })
   // This function mirrors the functionality of the normal `fetch()` function,
   // but adds the authentication token to the header before calling fetch.
