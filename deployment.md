@@ -224,7 +224,8 @@ Finally, lets create a form component to wrap it all up in:
 
 ```jsx
 import React, { Component } from 'react'
-import RequiredInput from '../presentational/Input.jsx'
+import TextInput from '../presentational/textInput.jsx'
+import PasswordInput from '../presentational/passwordInput.jsx'
 import SubmitButton from '../presentational/SubmitButton.jsx'
 
 export default class LoginFormContainer extends Component {
@@ -315,7 +316,7 @@ export default class LoginFormContainer extends Component {
   ...
 
   async handleSubmission() {
-    // if your SubmitButton is an <html> button tag internally, you must call
+    // if your SubmitButton is an html <button> tag internally, you must call
     // event.preventDefault() here.
     try {
       // The actual login function, this will throw an exception with a list of
