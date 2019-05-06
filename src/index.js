@@ -1,12 +1,6 @@
 // get the fetch capability whether we're in the browser or node
 const fetch = window.fetch || require('node-fetch')
 
-export class TooOldBrowser extends Error {
-  constructor() {
-    super("your browser is too old to use the fetch() function! Use XHR instead.")
-  }
-}
-
 export class InvalidToken extends Error {
   constructor(token_value) {
     super("got invalid token value '" + token_value + "'")
@@ -54,6 +48,7 @@ const isNonEmptyArray = (potArr) => Array.isArray(potArr) && potArr.length
 // store the given value as a new authentication token.
 const keep = (newToken) => {
   if( !newToken ) throw new InvalidToken(newToken)
+  // token is a global variable
   token = newToken
   document.cookie = "auth=" + newToken + ";samesite=strict;secure;max-age=" + days(7)
   return newToken
@@ -61,8 +56,15 @@ const keep = (newToken) => {
 const retrieveToken = () => cookieHash()["auth"]
 
 export default function(host, signInEndpoint = '/sign_in') {
-  const SIGN_IN_ADDR = host + signInEndpoint
+  if( !(typeof signInEndpoint === 'string' || signInEndpoint instanceof String) ||
+      signInEndpoint.length === 0 ) {
+    // A big guard against invalid values. Nothing but a string gets through, and
+    // the empty string gets assigned to / before checking its 0 index (which the
+    // empty string does not have)
+    signInEndpoint = '/'
+  }	
   if( !(signInEndpoint[0] == '/') ) signInEndpoint = '/' + signInEndpoint
+  const SIGN_IN_ADDR = host + signInEndpoint
   // Log in with a given username and password.
   //
   // This stores the login token in the document's cookie and returns it. Either
@@ -74,7 +76,6 @@ export default function(host, signInEndpoint = '/sign_in') {
     fetch(SIGN_IN_ADDR, {method: 'POST', body: JSON.stringify(data)})
       .then(response => {
         if( response.ok ) return response.json()
-        console.log(response.statusText)
         return response.json()
           .then( ({errors}) => reject(new FailedLogin(username, errors)))
           .catch(e => { console.error(e); return response.text()})
