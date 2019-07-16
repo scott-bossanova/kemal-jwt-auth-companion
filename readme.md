@@ -46,3 +46,19 @@ login('my-username', 'my password').then(() => {
 
 Also available is the authXHR function which provides a new XHR with
 authentication set up already.
+
+### Testing
+Currently testing is done manually via the example at `index.html`. Since the
+library is so small, this seems reasonable to me, but a PR or discussion around
+automated testing solutions would be welcome.
+
+The manual testing process is as follows:
+1. clone this repo, as well as the server-side library.
+2. install the dependencies -- Crystal, Node, and NPM/Yarn
+3. Run the example from the server library (from within the server library
+   repository, run `crystal run example/example.cr`), or run your own
+   authenticated Kemal server on port 3000.
+4. From this project's directory, run `npm start`.
+5. Visit `http://localhost:8080/index.html` and open the dev console (F12). A
+   JWT should be displayed, and requests made to `https://localhost:8080/api`
+   will be authenticated and proxied to the server library example server.

@@ -4,6 +4,7 @@ module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'build'),
+    publicPath: 'dev-build/',
     filename: 'kemal-jwt-auth.js',
     library: 'KemalAuth'
   },
@@ -16,6 +17,8 @@ module.exports = {
   },
   devServer: {
     host: '0.0.0.0',
+    https: true,
+    // filename: "kemal-jwt-auth.dev.js",
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
