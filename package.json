@@ -30,6 +30,7 @@
   "homepage": "https://github.com/dscottboggs/kemal_jwt_auth_token#readme",
   "devDependencies": {
     "browserify": "^16.2.3",
+    "eslint": "^6.0.1",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.2.1"
   },
