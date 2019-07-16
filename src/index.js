@@ -1,19 +1,23 @@
 // get the fetch capability whether we're in the browser or node
-const fetch = window.fetch || require('node-fetch')
+const fetch = window? window.fetch
+                    : require('node-fetch')
 
 export class InvalidToken extends Error {
   constructor(token_value) {
-    super("got invalid token value '" + token_value + "'")
+    super(`got invalid token value "${token_value}"`)
   }
 }
 
 export class FailedLogin extends Error {
   constructor(user, response) {
     let errors
-    if( typeof response === 'string' || response instanceof String )
+    if( typeof response === 'string' ||
+        response instanceof String )
       errors = response
-    if( response.errors && Array.isArray(response.errors) && response.errors.length)
+    if( isNonEmptyArray(response.errors) )
+    {
       errors = response.errors.join("; ")
+    }
     super( 'failed to log in "' +
            user +
            '": status ' +
@@ -23,6 +27,11 @@ export class FailedLogin extends Error {
   }
 }
 
+export class NoLoginInfo extends Error {
+  constructor() {
+    super("can't log in with no authentication information -- please specify a username or a password!")
+  }
+}
 let token
 let handleError = console.error
 
@@ -33,14 +42,18 @@ const hours = count => 60 * minutes(count)
 // Returns the given number of days as seconds
 const days = count => 24 * hours(count)
 // Parse the document.cookie response into an indexable mapping.
-const cookieHash = () => {
-  let out
+const cookieNamed = (name) => {
+  let key, value
   document
     .cookie
     .split(';')
-    .map(cookie => cookie.trim().split('='))
-    .forEach(pair => out[pair[0]] = pair[1])
-  return out
+    .find(cookie => {
+      [key, value] = cookie.trim().split('=', 2)
+      if( key === name && value )
+         return true
+      value = null
+    })
+  return value
 }
 // True if the given value is an array whose size is truthy (not 0)
 const isNonEmptyArray = (potArr) => Array.isArray(potArr) && potArr.length
@@ -53,7 +66,6 @@ const keep = (newToken) => {
   document.cookie = "auth=" + newToken + ";samesite=strict;secure;max-age=" + days(7)
   return newToken
 }
-const retrieveToken = () => cookieHash()["auth"]
 
 export default function(host, signInEndpoint = '/sign_in') {
   if( !(typeof signInEndpoint === 'string' || signInEndpoint instanceof String) ||
@@ -62,7 +74,7 @@ export default function(host, signInEndpoint = '/sign_in') {
     // the empty string gets assigned to / before checking its 0 index (which the
     // empty string does not have)
     signInEndpoint = '/'
-  }	
+  }
   if( !(signInEndpoint[0] == '/') ) signInEndpoint = '/' + signInEndpoint
   const SIGN_IN_ADDR = host + signInEndpoint
   // Log in with a given username and password.
@@ -73,6 +85,7 @@ export default function(host, signInEndpoint = '/sign_in') {
     let data = {}
     if( username ) data['name'] = username
     if( password ) data['auth'] = password
+    if( Object.keys(data).length === 0 ) throw new NoLoginInfo
     fetch(SIGN_IN_ADDR, {method: 'POST', body: JSON.stringify(data)})
       .then(response => {
         if( response.ok ) return response.json()
@@ -91,17 +104,16 @@ export default function(host, signInEndpoint = '/sign_in') {
   // This function mirrors the functionality of the normal `fetch()` function,
   // but adds the authentication token to the header before calling fetch.
   const authFetch = (input, init) => {
-    if( input == host ) {
+    if( input.startsWith(host) || input.startsWith('/') ) {
       init = init || {}
       init.headers = init.headers || {}
-      let t = token || retrieveToken()
-      init.headers["X-Token"] = t
+      init.headers["X-Token"] = token || cookieNamed("auth")
     }
     return fetch(input, init)
   }
   const authXHR = () => {
     const out = new XMLHttpRequest()
-    out.setRequestHeader('X-Token', token)
+    out.setRequestHeader('X-Token', token || cookieNamed('auth'))
     return out
   }
   return {login, authFetch, authXHR}
