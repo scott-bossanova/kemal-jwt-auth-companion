@@ -1,6 +1,6 @@
 // get the fetch capability whether we're in the browser or node
 const fetch = window? window.fetch
-                    : require('node-fetch')
+  : require('node-fetch')
 
 export class InvalidToken extends Error {
   constructor(token_value) {
@@ -19,11 +19,11 @@ export class FailedLogin extends Error {
       errors = response.errors.join("; ")
     }
     super( 'failed to log in "' +
-           user +
-           '": status ' +
-           response.statusCode +
+      user +
+      '": status ' +
+      response.statusCode +
            errors? 'errors: ' + errors
-                 : '')
+      : '')
   }
 }
 
@@ -50,7 +50,7 @@ const cookieNamed = (name) => {
     .find(cookie => {
       [key, value] = cookie.trim().split('=', 2)
       if( key === name && value )
-         return true
+        return true
       value = null
     })
   return value
@@ -67,16 +67,17 @@ const keep = (newToken) => {
   return newToken
 }
 
-export default function(host, signInEndpoint = '/sign_in') {
-  if( !(typeof signInEndpoint === 'string' || signInEndpoint instanceof String) ||
-      signInEndpoint.length === 0 ) {
-    // A big guard against invalid values. Nothing but a string gets through, and
-    // the empty string gets assigned to / before checking its 0 index (which the
-    // empty string does not have)
+export default function (host, signInEndpoint = '/sign_in') {
+  // The next few lines are a big guard against invalid values. Nothing but a
+  // string gets through, and the empty string gets assigned to a reasonable
+  // default before checking its 0 index (which the empty string does not have)
+  if (!host || !(typeof host === 'string' || host instanceof String))
+    host = '/'
+  if (!signInEndpoint || !(typeof signInEndpoint === 'string' || signInEndpoint instanceof String))
     signInEndpoint = '/'
-  }
-  if( !(signInEndpoint[0] == '/') ) signInEndpoint = '/' + signInEndpoint
-  const SIGN_IN_ADDR = host + signInEndpoint
+  if (!(signInEndpoint[0] == '/')) signInEndpoint = '/' + signInEndpoint
+  if (host[host.length - 1] != '/') host += '/'
+  const SIGN_IN_ADDR = host.slice(0, host.length - 1) + signInEndpoint
   // Log in with a given username and password.
   //
   // This stores the login token in the document's cookie and returns it. Either
